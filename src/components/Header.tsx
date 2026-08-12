@@ -12,7 +12,14 @@ const navItems = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [accountHint, setAccountHint] = useState(false)
   const { itemCount, openCart } = useCart()
+
+  useEffect(() => {
+    if (!accountHint) return
+    const timer = window.setTimeout(() => setAccountHint(false), 2200)
+    return () => window.clearTimeout(timer)
+  }, [accountHint])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -61,13 +68,24 @@ export function Header() {
             >
               <Search size={20} strokeWidth={1.4} />
             </button>
-            <button
-              type="button"
-              className="hidden h-10 w-10 items-center justify-center text-ink transition-opacity hover:opacity-60 sm:flex"
-              aria-label="Cuenta"
-            >
-              <User size={20} strokeWidth={1.4} />
-            </button>
+            <div className="relative hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setAccountHint(true)}
+                className="flex h-10 w-10 items-center justify-center text-ink transition-opacity hover:opacity-60"
+                aria-label="Cuenta"
+              >
+                <User size={20} strokeWidth={1.4} />
+              </button>
+              {accountHint ? (
+                <span
+                  className="pointer-events-none absolute right-0 top-full z-20 mt-1 whitespace-nowrap bg-ink px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-cream shadow-[0_4px_16px_rgba(0,0,0,0.12)] animate-fade-in"
+                  role="status"
+                >
+                  Próximamente
+                </span>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={openCart}
