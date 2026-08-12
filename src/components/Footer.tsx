@@ -1,3 +1,5 @@
+import { ContactDetails } from './ContactDetails'
+
 export function Footer() {
   return (
     <footer className="border-t border-line bg-[#f3f1ec] text-ink">
@@ -26,6 +28,7 @@ export function Footer() {
               </a>
             </li>
           </ul>
+          <ContactDetails variant="footer" />
         </div>
 
         <div>

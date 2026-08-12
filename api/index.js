@@ -98,6 +98,26 @@ export default async function handler(req, res) {
       return send(res, 200, catalog)
     }
 
+    if (route === 'admin/contact' && method === 'PUT') {
+      if (!isAuthorized(req.headers.authorization)) {
+        return send(res, 401, { error: 'No autorizado' })
+      }
+      const body = readBody(req)
+      const contact = body.contact && typeof body.contact === 'object' ? body.contact : body
+      const email = typeof contact.email === 'string' ? contact.email.trim() : ''
+      const phone = typeof contact.phone === 'string' ? contact.phone.trim() : ''
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return send(res, 400, { error: 'Correo inválido' })
+      }
+      if (email.length > 200 || phone.length > 40) {
+        return send(res, 400, { error: 'Datos inválidos' })
+      }
+      const catalog = await readCatalog()
+      catalog.contact = { email, phone }
+      await writeCatalog(catalog)
+      return send(res, 200, catalog)
+    }
+
     if (route === 'admin/products' && method === 'POST') {
       if (!isAuthorized(req.headers.authorization)) {
         return send(res, 401, { error: 'No autorizado' })

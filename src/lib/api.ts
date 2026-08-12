@@ -2,8 +2,10 @@ import type {
   Catalog,
   CatalogBanner,
   CatalogCategory,
+  CatalogContact,
   CatalogProduct,
 } from '../types/catalog'
+import { normalizeCatalog } from '../types/catalog'
 
 const TOKEN_KEY = 'lumi-admin-token'
 
@@ -41,7 +43,7 @@ function authHeaders(): HeadersInit {
 export async function fetchCatalog(): Promise<Catalog> {
   const res = await fetch('/api/catalog')
   if (!res.ok) throw new Error(await parseError(res))
-  return res.json() as Promise<Catalog>
+  return normalizeCatalog(await res.json())
 }
 
 export async function loginAdmin(token: string): Promise<void> {
@@ -69,6 +71,16 @@ export async function saveCategories(categories: CatalogCategory[]): Promise<Cat
     method: 'PUT',
     headers: authHeaders(),
     body: JSON.stringify({ categories }),
+  })
+  if (!res.ok) throw new Error(await parseError(res))
+  return res.json() as Promise<Catalog>
+}
+
+export async function saveContact(contact: CatalogContact): Promise<Catalog> {
+  const res = await fetch('/api/admin/contact', {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ contact }),
   })
   if (!res.ok) throw new Error(await parseError(res))
   return res.json() as Promise<Catalog>

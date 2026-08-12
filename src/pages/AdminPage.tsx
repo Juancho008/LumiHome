@@ -9,6 +9,7 @@ import {
   loginAdmin,
   saveBanners,
   saveCategories,
+  saveContact,
   updateProduct,
 } from '../lib/api'
 import { fileToWebpDataUrl } from '../lib/toWebp'
@@ -18,13 +19,14 @@ import type {
   CatalogBanner,
   CatalogCategory,
   CatalogColor,
+  CatalogContact,
   CatalogProduct,
   ProductBadge,
 } from '../types/catalog'
 import { Logo } from '../components/Logo'
 import { ProductBadges, ProductPrice } from '../components/ProductBadges'
 
-type Tab = 'banners' | 'categories' | 'products'
+type Tab = 'banners' | 'categories' | 'products' | 'contact'
 
 function newId(prefix: string) {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
@@ -93,11 +95,16 @@ export function AdminPage() {
 
   const [banners, setBanners] = useState<CatalogBanner[]>([])
   const [categories, setCategories] = useState<CatalogCategory[]>([])
+  const [contact, setContact] = useState<CatalogContact>({ email: '', phone: '' })
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null)
 
   useEffect(() => {
     setBanners(catalog.banners)
     setCategories(catalog.categories)
+    setContact({
+      email: catalog.contact?.email ?? '',
+      phone: catalog.contact?.phone ?? '',
+    })
   }, [catalog])
 
   const onLogin = async (e: FormEvent) => {
@@ -211,6 +218,7 @@ export function AdminPage() {
               ['banners', 'Banners'],
               ['categories', 'Categorías'],
               ['products', 'Productos'],
+              ['contact', 'Contacto'],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -398,6 +406,43 @@ export function AdminPage() {
               className="bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-cream hover:bg-gold hover:text-ink disabled:opacity-50"
             >
               {saving ? 'Guardando…' : 'Guardar categorías'}
+            </button>
+          </section>
+        ) : null}
+
+        {tab === 'contact' ? (
+          <section className="mt-8 max-w-xl space-y-6">
+            <h2 className="font-serif text-2xl tracking-[0.06em]">Contacto</h2>
+            <p className="text-[13px] text-muted">
+              Estos datos se muestran en la sección de contacto y en el pie de la tienda.
+            </p>
+            <label className="block text-[12px]">
+              Correo
+              <input
+                type="email"
+                value={contact.email}
+                onChange={(e) => setContact((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="hola@lumihome.com"
+                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
+              />
+            </label>
+            <label className="block text-[12px]">
+              Teléfono
+              <input
+                type="tel"
+                value={contact.phone}
+                onChange={(e) => setContact((prev) => ({ ...prev, phone: e.target.value }))}
+                placeholder="+54 11 1234-5678"
+                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
+              />
+            </label>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void withSave(() => saveContact(contact))}
+              className="bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-cream hover:bg-gold hover:text-ink disabled:opacity-50"
+            >
+              {saving ? 'Guardando…' : 'Guardar contacto'}
             </button>
           </section>
         ) : null}

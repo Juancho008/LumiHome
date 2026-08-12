@@ -4,9 +4,10 @@ import type {
   Catalog,
   CatalogBanner,
   CatalogCategory,
+  CatalogContact,
   CatalogProduct,
 } from '../../src/types/catalog'
-import { CATALOG_KEY, emptyCatalog } from '../../src/types/catalog'
+import { CATALOG_KEY, emptyCatalog, normalizeCatalog } from '../../src/types/catalog'
 import { createSeedCatalog } from './seed'
 
 type Bindings = {
@@ -27,7 +28,7 @@ async function readCatalog(kv: KVNamespace): Promise<Catalog> {
     return seed
   }
   try {
-    return JSON.parse(raw) as Catalog
+    return normalizeCatalog(JSON.parse(raw))
   } catch {
     return emptyCatalog()
   }
@@ -123,6 +124,25 @@ app.put('/api/admin/categories', async (c) => {
   return c.json(catalog)
 })
 
+app.put('/api/admin/contact', async (c) => {
+  if (!requireAdmin(c)) return unauthorized()
+  const body = (await c.req.json()) as { contact?: CatalogContact } & Partial<CatalogContact>
+  const raw = body.contact && typeof body.contact === 'object' ? body.contact : body
+  const email = typeof raw.email === 'string' ? raw.email.trim() : ''
+  const phone = typeof raw.phone === 'string' ? raw.phone.trim() : ''
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return c.json({ error: 'Correo inválido' }, 400)
+  }
+  if (email.length > 200 || phone.length > 40) {
+    return c.json({ error: 'Datos inválidos' }, 400)
+  }
+  const catalog = await readCatalog(c.env.LUMI_STORE)
+  catalog.contact = { email, phone }
+  const err = await writeCatalog(c.env.LUMI_STORE, catalog)
+  if (err) return err
+  return c.json(catalog)
+})
+
 app.post('/api/admin/products', async (c) => {
   if (!requireAdmin(c)) return unauthorized()
   const product = (await c.req.json()) as CatalogProduct
@@ -175,9 +195,10 @@ app.put('/api/admin/catalog', async (c) => {
   if (!catalog || !Array.isArray(catalog.banners) || !Array.isArray(catalog.categories) || !Array.isArray(catalog.products)) {
     return c.json({ error: 'catálogo inválido' }, 400)
   }
-  const err = await writeCatalog(c.env.LUMI_STORE, catalog)
+  const next = normalizeCatalog(catalog)
+  const err = await writeCatalog(c.env.LUMI_STORE, next)
   if (err) return err
-  return c.json(catalog)
+  return c.json(next)
 })
 
 app.all('*', async (c) => {

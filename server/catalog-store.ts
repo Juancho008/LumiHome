@@ -1,4 +1,4 @@
-import { CATALOG_KEY, emptyCatalog, type Catalog } from './types'
+import { CATALOG_KEY, emptyCatalog, normalizeCatalog, type Catalog } from './types'
 import { createSeedCatalog } from './seed'
 
 type KvConfig = {
@@ -62,7 +62,7 @@ export async function readCatalog(): Promise<Catalog> {
     return seed
   }
   try {
-    return JSON.parse(raw) as Catalog
+    return normalizeCatalog(JSON.parse(raw))
   } catch {
     return emptyCatalog()
   }

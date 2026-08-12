@@ -3,6 +3,10 @@ import type { Catalog } from './types'
 /** Seed with stable public URLs under /products/*.webp */
 export function createSeedCatalog(): Catalog {
   return {
+    contact: {
+      email: 'hola@lumihome.com',
+      phone: '',
+    },
     banners: [
       {
         id: 'banner-1',
