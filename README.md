@@ -1,16 +1,16 @@
 # Lumi Home
 
-Tienda de decoración + panel admin con Cloudflare Worker y KV.
+Tienda de decoración + panel admin. Frontend y API en **Vercel**; datos en **Cloudflare KV**.
 
 ## Desarrollo local
 
-En una terminal:
+Terminal 1 (API local con KV simulada):
 
 ```bash
 npm run dev:api
 ```
 
-En otra:
+Terminal 2 (Vite):
 
 ```bash
 npm run dev
@@ -18,37 +18,44 @@ npm run dev
 
 - Tienda: http://localhost:5173/
 - Admin: http://localhost:5173/admin
-- Token local (`.dev.vars`): `lumi-admin-dev`
+- Token (`.dev.vars`): `lumi-admin-dev`
 
-Vite proxyea `/api` hacia el Worker en el puerto 8787.
+Vite proxyea `/api` → Worker en `:8787`.
 
-## Deploy
+## Deploy en Vercel
 
-1. Crear el namespace KV y actualizar `id` / `preview_id` en `wrangler.jsonc`:
+1. Crear un namespace KV en Cloudflare:
 
 ```bash
 npx wrangler kv namespace create LUMI_STORE
-npx wrangler kv namespace create LUMI_STORE --preview
 ```
 
-2. Configurar el secret:
+2. En Vercel → Project → Settings → Environment Variables:
+
+| Variable | Descripción |
+|----------|-------------|
+| `ADMIN_TOKEN` | Contraseña del panel `/admin` |
+| `CF_ACCOUNT_ID` | Account ID de Cloudflare |
+| `CF_KV_NAMESPACE_ID` | ID del namespace KV |
+| `CF_API_TOKEN` | Token con permiso de edición KV |
+
+3. Deploy:
 
 ```bash
-npx wrangler secret put ADMIN_TOKEN
+npm i -g vercel
+vercel
 ```
 
-3. Publicar:
+O conectá el repo en el dashboard de Vercel (build: `npm run build`, output: `dist`).
 
-```bash
-npm run deploy
-```
+Las rutas `/api/*` viven como Serverless Functions en Vercel y leen/escriben el JSON del catálogo en Cloudflare KV (imágenes WebP en base64 incluidas).
 
 ## Panel admin
 
-En `/admin` podés:
+En `/admin`:
 
-- Editar banners del hero
-- Crear/editar categorías
-- Crear/editar productos con descripción, color picker e **imagen por color** (convertida a WebP al subir)
+- Banners del hero
+- Categorías
+- Productos con descripción, color picker e **imagen por color** (convertida a WebP al subir)
 
-El catálogo se guarda en KV (`catalog`) como JSON, con imágenes embebidas en base64 WebP cuando las subís desde el admin.
+Al cambiar el color en la tienda, cambia la imagen del producto.

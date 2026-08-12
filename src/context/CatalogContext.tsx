@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { fetchCatalog } from '../lib/api'
+import { createSeedCatalog } from '../../server/seed'
 import type { Catalog } from '../types/catalog'
 import { emptyCatalog } from '../types/catalog'
 
@@ -33,6 +34,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       const data = await fetchCatalog()
       setCatalog(data)
     } catch (err) {
+      setCatalog(createSeedCatalog())
       setError(err instanceof Error ? err.message : 'No se pudo cargar el catálogo')
     } finally {
       setLoading(false)
