@@ -50,6 +50,23 @@ function unauthorized() {
   return Response.json({ error: 'No autorizado' }, { status: 401 })
 }
 
+function isValidProduct(product: CatalogProduct | null | undefined): product is CatalogProduct {
+  if (!product || typeof product !== 'object') return false
+  if (typeof product.name !== 'string' || !product.name.trim()) return false
+  if (typeof product.price !== 'string') return false
+  if (typeof product.description !== 'string') return false
+  if (!Array.isArray(product.colors) || product.colors.length === 0) return false
+  return product.colors.every(
+    (color) =>
+      Boolean(color) &&
+      typeof color.name === 'string' &&
+      color.name.trim().length > 0 &&
+      typeof color.hex === 'string' &&
+      color.hex.trim().length > 0 &&
+      typeof color.image === 'string',
+  )
+}
+
 function requireAdmin(c: { req: { header: (name: string) => string | undefined }; env: Bindings }) {
   const header = c.req.header('Authorization') || ''
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
@@ -103,7 +120,7 @@ app.put('/api/admin/categories', async (c) => {
 app.post('/api/admin/products', async (c) => {
   if (!requireAdmin(c)) return unauthorized()
   const product = (await c.req.json()) as CatalogProduct
-  if (!product?.id || !product?.name || !Array.isArray(product.colors)) {
+  if (!product?.id || !isValidProduct(product)) {
     return c.json({ error: 'producto inválido' }, 400)
   }
   const catalog = await readCatalog(c.env.LUMI_STORE)
@@ -120,6 +137,9 @@ app.put('/api/admin/products/:id', async (c) => {
   if (!requireAdmin(c)) return unauthorized()
   const id = c.req.param('id')
   const product = (await c.req.json()) as CatalogProduct
+  if (!isValidProduct(product)) {
+    return c.json({ error: 'producto inválido' }, 400)
+  }
   const catalog = await readCatalog(c.env.LUMI_STORE)
   const index = catalog.products.findIndex((p) => p.id === id)
   if (index < 0) return c.json({ error: 'Producto no encontrado' }, 404)
