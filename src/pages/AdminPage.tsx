@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import {
   clearAdminToken,
   createProduct,
@@ -52,17 +53,19 @@ function ImageUpload({
 
   return (
     <div>
-      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/70">{label}</p>
       <div className="mt-2 flex items-start gap-3">
         <div className="h-20 w-20 shrink-0 overflow-hidden bg-[#efece6]">
           {value ? (
             <img src={value} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-[10px] text-muted">Sin img</div>
+            <div className="flex h-full items-center justify-center text-[11px] font-medium text-muted">
+              Sin img
+            </div>
           )}
         </div>
-        <label className="inline-flex cursor-pointer bg-ink px-3 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-cream transition-colors hover:bg-gold hover:text-ink">
-          {busy ? 'Convirtiendo…' : 'Subir WebP'}
+        <label className="inline-flex cursor-pointer bg-ink px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-gold hover:text-ink">
+          {busy ? 'Convirtiendo…' : 'Subir imagen'}
           <input
             type="file"
             accept="image/*"
@@ -211,7 +214,7 @@ export function AdminPage() {
               key={id}
               type="button"
               onClick={() => setTab(id)}
-              className={`px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] transition-colors ${
+              className={`px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] transition-colors ${
                 tab === id ? 'bg-ink text-cream' : 'bg-transparent text-ink hover:bg-ink/5'
               }`}
             >
@@ -451,6 +454,20 @@ function ProductsAdmin({
 }) {
   const isNew = editing ? !products.some((p) => p.id === editing.id) : false
 
+  useEffect(() => {
+    if (!editing) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setEditing(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [editing, setEditing])
+
   const updateColor = (index: number, patch: Partial<CatalogColor>) => {
     if (!editing) return
     setEditing({
@@ -459,192 +476,270 @@ function ProductsAdmin({
     })
   }
 
+  const categoryTitle = (id?: string) =>
+    categories.find((item) => item.id === id)?.title || 'Sin categoría'
+
   return (
     <section className="mt-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-2xl tracking-[0.06em]">Productos</h2>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-3xl font-semibold tracking-[0.04em]">Productos</h2>
+          <p className="mt-1 text-sm font-medium text-muted">
+            {products.length} {products.length === 1 ? 'pieza' : 'piezas'} en el catálogo
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setEditing(emptyProduct(categories))}
-          className="bg-ink px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-cream hover:bg-gold hover:text-ink"
+          className="inline-flex items-center gap-2 bg-ink px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-gold hover:text-ink"
         >
+          <Plus size={16} strokeWidth={2.2} />
           Nuevo producto
         </button>
       </div>
 
-      <div className="grid gap-3">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex flex-wrap items-center justify-between gap-3 border border-line bg-white/30 px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <img
-                src={product.colors[0]?.image || ''}
-                alt=""
-                className="h-14 w-12 object-cover bg-[#efece6]"
-              />
-              <div>
-                <p className="font-serif text-lg">{product.name}</p>
-                <p className="text-[12px] text-muted">{product.price}</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
+      {products.length === 0 ? (
+        <div className="border border-dashed border-line bg-white/40 px-6 py-16 text-center">
+          <p className="font-serif text-2xl font-semibold">Todavía no hay productos</p>
+          <p className="mt-2 text-sm font-medium text-muted">Creá el primero para verlo en la tienda.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {products.map((product) => (
+            <article
+              key={product.id}
+              className="group overflow-hidden border border-line bg-white/55 shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
+            >
               <button
                 type="button"
                 onClick={() => setEditing(structuredClone(product))}
-                className="text-[10px] uppercase tracking-[0.14em] hover:text-gold"
+                className="block w-full text-left"
               >
-                Editar
+                <div className="relative overflow-hidden bg-[#efece6]">
+                  {product.colors[0]?.image ? (
+                    <img
+                      src={product.colors[0].image}
+                      alt={product.name}
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <div className="flex aspect-[4/3] items-center justify-center text-sm font-medium text-muted">
+                      Sin imagen
+                    </div>
+                  )}
+                  <span className="absolute left-3 top-3 bg-cream/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
+                    {categoryTitle(product.categoryId)}
+                  </span>
+                </div>
+                <div className="px-4 py-4">
+                  <h3 className="font-serif text-xl font-semibold leading-tight">{product.name}</h3>
+                  <p className="mt-1 text-sm font-semibold text-ink/80">{product.price || 'Sin precio'}</p>
+                  <div className="mt-3 flex items-center gap-1.5">
+                    {product.colors.map((color) => (
+                      <span
+                        key={`${product.id}-${color.name}`}
+                        title={color.name}
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                    ))}
+                    <span className="ml-1 text-[12px] font-medium text-muted">
+                      {product.colors.length} {product.colors.length === 1 ? 'color' : 'colores'}
+                    </span>
+                  </div>
+                </div>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm(`¿Eliminar ${product.name}?`)) onDelete(product.id)
-                }}
-                className="text-[10px] uppercase tracking-[0.14em] text-muted hover:text-ink"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+              <div className="flex border-t border-line">
+                <button
+                  type="button"
+                  onClick={() => setEditing(structuredClone(product))}
+                  className="flex flex-1 items-center justify-center gap-2 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-cream"
+                >
+                  <Pencil size={14} strokeWidth={2.2} />
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`¿Eliminar ${product.name}?`)) onDelete(product.id)
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 border-l border-line py-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-muted transition-colors hover:bg-ink/5 hover:text-ink"
+                >
+                  <Trash2 size={14} strokeWidth={2.2} />
+                  Eliminar
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
 
       {editing ? (
-        <div className="border border-line bg-white/40 p-5">
-          <h3 className="font-serif text-xl tracking-[0.04em]">
-            {isNew ? 'Crear producto' : 'Editar producto'}
-          </h3>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <label className="block text-[12px]">
-              Nombre
-              <input
-                value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
-              />
-            </label>
-            <label className="block text-[12px]">
-              Precio
-              <input
-                value={editing.price}
-                onChange={(e) => setEditing({ ...editing, price: e.target.value })}
-                placeholder="$189.000"
-                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
-              />
-            </label>
-            <label className="block text-[12px] md:col-span-2">
-              Descripción
-              <textarea
-                value={editing.description}
-                onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-                rows={3}
-                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
-              />
-            </label>
-            <label className="block text-[12px]">
-              Categoría
-              <select
-                value={editing.categoryId || ''}
-                onChange={(e) =>
-                  setEditing({ ...editing, categoryId: e.target.value || undefined })
-                }
-                className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
-              >
-                <option value="">Sin categoría</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-8">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em]">
-                Colores disponibles
-              </p>
+        <div
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-ink/45 px-3 py-3 backdrop-blur-[3px] animate-fade-in sm:items-center sm:px-6"
+          onClick={() => setEditing(null)}
+          role="presentation"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-editor-title"
+            className="animate-fade-up relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden bg-cream shadow-[0_30px_80px_rgba(0,0,0,0.22)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-5 md:px-8">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
+                  {isNew ? 'Nuevo' : 'Edición'}
+                </p>
+                <h3 id="product-editor-title" className="mt-1 font-serif text-3xl font-semibold tracking-[0.03em]">
+                  {isNew ? 'Crear producto' : 'Editar producto'}
+                </h3>
+              </div>
               <button
                 type="button"
-                onClick={() =>
-                  setEditing({
-                    ...editing,
-                    colors: [
-                      ...editing.colors,
-                      { name: 'Nuevo', hex: '#C5A059', image: '' },
-                    ],
-                  })
-                }
-                className="text-[10px] uppercase tracking-[0.14em] hover:text-gold"
+                onClick={() => setEditing(null)}
+                className="flex h-10 w-10 items-center justify-center text-ink transition-opacity hover:opacity-55"
+                aria-label="Cerrar"
               >
-                Agregar color
+                <X size={22} strokeWidth={1.8} />
               </button>
             </div>
 
-            <div className="mt-4 space-y-4">
-              {editing.colors.map((color, index) => (
-                <div key={index} className="grid gap-4 border border-line p-4 md:grid-cols-[1fr_auto_1fr]">
-                  <label className="block text-[12px]">
-                    Nombre del color
-                    <input
-                      value={color.name}
-                      onChange={(e) => updateColor(index, { name: e.target.value })}
-                      className="mt-1 w-full border border-line bg-cream px-3 py-2 outline-none focus:border-ink"
-                    />
-                  </label>
-                  <label className="block text-[12px]">
-                    Color
-                    <input
-                      type="color"
-                      value={color.hex}
-                      onChange={(e) => updateColor(index, { hex: e.target.value })}
-                      className="mt-1 h-10 w-16 cursor-pointer border border-line bg-cream p-1"
-                    />
-                  </label>
-                  <ImageUpload
-                    label="Imagen de este color"
-                    value={color.image}
-                    onChange={(image) => updateColor(index, { image })}
+            <div className="flex-1 overflow-y-auto px-5 py-6 md:px-8">
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block text-[13px] font-semibold">
+                  Nombre
+                  <input
+                    value={editing.name}
+                    onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
                   />
+                </label>
+                <label className="block text-[13px] font-semibold">
+                  Precio
+                  <input
+                    value={editing.price}
+                    onChange={(e) => setEditing({ ...editing, price: e.target.value })}
+                    placeholder="$189.000"
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
+                  />
+                </label>
+                <label className="block text-[13px] font-semibold md:col-span-2">
+                  Descripción
+                  <textarea
+                    value={editing.description}
+                    onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                    rows={3}
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
+                  />
+                </label>
+                <label className="block text-[13px] font-semibold">
+                  Categoría
+                  <select
+                    value={editing.categoryId || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, categoryId: e.target.value || undefined })
+                    }
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
+                  >
+                    <option value="">Sin categoría</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="mt-8">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[13px] font-semibold">Colores e imágenes</p>
                   <button
                     type="button"
                     onClick={() =>
                       setEditing({
                         ...editing,
-                        colors: editing.colors.filter((_, i) => i !== index),
+                        colors: [...editing.colors, { name: 'Nuevo', hex: '#C5A059', image: '' }],
                       })
                     }
-                    className="text-left text-[10px] uppercase tracking-[0.14em] text-muted hover:text-ink md:col-span-3"
+                    className="inline-flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] hover:text-gold"
                   >
-                    Quitar color
+                    <Plus size={14} strokeWidth={2.2} />
+                    Agregar color
                   </button>
                 </div>
-              ))}
-            </div>
-          </div>
+                <p className="mt-1 text-[13px] font-medium text-muted">
+                  Cada color puede tener su propia foto. Así el cliente ve el producto al cambiar el tono.
+                </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={saving || !editing.name || editing.colors.length === 0}
-              onClick={() => {
-                if (isNew) void onCreate(editing)
-                else void onUpdate(editing)
-              }}
-              className="bg-ink px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-cream hover:bg-gold hover:text-ink disabled:opacity-50"
-            >
-              {saving ? 'Guardando…' : isNew ? 'Crear producto' : 'Guardar cambios'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditing(null)}
-              className="px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-muted hover:text-ink"
-            >
-              Cancelar
-            </button>
+                <div className="mt-4 space-y-4">
+                  {editing.colors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="grid gap-4 border border-line bg-white/60 p-4 md:grid-cols-[1fr_auto_1fr]"
+                    >
+                      <label className="block text-[13px] font-semibold">
+                        Nombre del color
+                        <input
+                          value={color.name}
+                          onChange={(e) => updateColor(index, { name: e.target.value })}
+                          className="mt-2 w-full border border-line bg-cream px-3 py-2.5 text-sm font-medium outline-none focus:border-ink"
+                        />
+                      </label>
+                      <label className="block text-[13px] font-semibold">
+                        Color
+                        <input
+                          type="color"
+                          value={color.hex}
+                          onChange={(e) => updateColor(index, { hex: e.target.value })}
+                          className="mt-2 h-11 w-16 cursor-pointer border border-line bg-cream p-1"
+                        />
+                      </label>
+                      <ImageUpload
+                        label="Imagen de este color"
+                        value={color.image}
+                        onChange={(image) => updateColor(index, { image })}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing({
+                            ...editing,
+                            colors: editing.colors.filter((_, i) => i !== index),
+                          })
+                        }
+                        className="text-left text-[12px] font-semibold uppercase tracking-[0.1em] text-muted hover:text-ink md:col-span-3"
+                      >
+                        Quitar color
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 border-t border-line bg-[#f3f1ec] px-5 py-4 md:px-8">
+              <button
+                type="button"
+                disabled={saving || !editing.name || editing.colors.length === 0}
+                onClick={() => {
+                  if (isNew) void onCreate(editing)
+                  else void onUpdate(editing)
+                }}
+                className="bg-ink px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:bg-gold hover:text-ink disabled:opacity-50"
+              >
+                {saving ? 'Guardando…' : isNew ? 'Crear producto' : 'Guardar cambios'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ink"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
