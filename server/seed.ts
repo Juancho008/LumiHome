@@ -1,4 +1,4 @@
-import type { Catalog } from '../src/types/catalog'
+import type { Catalog } from './types'
 
 /** Seed with stable public URLs under /products/*.webp */
 export function createSeedCatalog(): Catalog {

@@ -9,8 +9,7 @@ import {
 } from 'react'
 import { fetchCatalog } from '../lib/api'
 import { createSeedCatalog } from '../../server/seed'
-import type { Catalog } from '../types/catalog'
-import { emptyCatalog } from '../types/catalog'
+import { emptyCatalog, type Catalog } from '../types/catalog'
 
 type CatalogContextValue = {
   catalog: Catalog

@@ -1,4 +1,4 @@
-import { CATALOG_KEY, emptyCatalog, type Catalog } from '../src/types/catalog'
+import { CATALOG_KEY, emptyCatalog, type Catalog } from './types'
 import { createSeedCatalog } from './seed'
 
 type KvConfig = {
@@ -12,9 +12,11 @@ function getKvConfig(): KvConfig {
   const namespaceId = process.env.CF_KV_NAMESPACE_ID || ''
   const apiToken = process.env.CF_API_TOKEN || ''
   if (!accountId || !namespaceId || !apiToken) {
-    throw new Error(
-      'Faltan variables CF_ACCOUNT_ID, CF_KV_NAMESPACE_ID o CF_API_TOKEN en Vercel',
-    )
+    const error = new Error('El servidor no está configurado.') as Error & {
+      statusCode?: number
+    }
+    error.statusCode = 503
+    throw error
   }
   return { accountId, namespaceId, apiToken }
 }

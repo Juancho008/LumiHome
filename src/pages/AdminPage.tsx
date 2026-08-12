@@ -143,13 +143,14 @@ export function AdminPage() {
             Panel admin
           </h1>
           <p className="mt-2 text-center text-[12px] text-muted">
-            Ingresá el ADMIN_TOKEN de Cloudflare
+            Ingresá tu contraseña para continuar
           </p>
           <input
             type="password"
             value={tokenInput}
             onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="Token"
+            placeholder="Contraseña"
+            autoComplete="current-password"
             className="mt-6 w-full border border-line bg-cream px-3 py-3 text-sm outline-none focus:border-ink"
             required
           />
