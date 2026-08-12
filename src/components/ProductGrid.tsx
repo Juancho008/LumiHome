@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCatalog } from '../context/CatalogContext'
 import type { CatalogProduct } from '../types/catalog'
+import { ProductBadges, ProductPrice } from './ProductBadges'
 import { ProductModal } from './ProductModal'
 
 export function ProductGrid() {
@@ -39,7 +40,8 @@ export function ProductGrid() {
                     onClick={() => openProduct(product)}
                     className="block w-full text-left"
                   >
-                    <div className="overflow-hidden bg-[#efece6]">
+                    <div className="relative overflow-hidden bg-[#efece6]">
+                      <ProductBadges product={product} />
                       {cover ? (
                         <img
                           src={cover}
@@ -54,7 +56,7 @@ export function ProductGrid() {
                     <h3 className="mt-4 font-serif text-lg tracking-[0.02em] text-ink md:text-xl">
                       {product.name}
                     </h3>
-                    <p className="mt-1 text-[12px] tracking-[0.04em] text-muted">{product.price}</p>
+                    <ProductPrice product={product} className="mt-1" />
                     <span className="mt-3 inline-block text-[10px] font-medium uppercase tracking-[0.18em] text-ink underline decoration-transparent underline-offset-4 transition-all duration-300 group-hover:decoration-ink">
                       Ver producto
                     </span>

@@ -13,13 +13,16 @@ import {
 } from '../lib/api'
 import { fileToWebpDataUrl } from '../lib/toWebp'
 import { useCatalog } from '../context/CatalogContext'
+import { BADGE_OPTIONS, productPricing } from '../lib/pricing'
 import type {
   CatalogBanner,
   CatalogCategory,
   CatalogColor,
   CatalogProduct,
+  ProductBadge,
 } from '../types/catalog'
 import { Logo } from '../components/Logo'
+import { ProductBadges, ProductPrice } from '../components/ProductBadges'
 
 type Tab = 'banners' | 'categories' | 'products'
 
@@ -429,6 +432,8 @@ function emptyProduct(categories: CatalogCategory[]): CatalogProduct {
     price: '',
     description: '',
     categoryId: categories[0]?.id,
+    badge: '',
+    discountPercent: 0,
     colors: [{ name: 'Natural', hex: '#C9B8A0', image: '' }],
   }
 }
@@ -527,13 +532,14 @@ function ProductsAdmin({
                       Sin imagen
                     </div>
                   )}
-                  <span className="absolute left-3 top-3 bg-cream/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
+                  <ProductBadges product={product} />
+                  <span className="absolute right-3 top-3 bg-cream/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink">
                     {categoryTitle(product.categoryId)}
                   </span>
                 </div>
                 <div className="px-4 py-4">
                   <h3 className="font-serif text-xl font-semibold leading-tight">{product.name}</h3>
-                  <p className="mt-1 text-sm font-semibold text-ink/80">{product.price || 'Sin precio'}</p>
+                  <ProductPrice product={product} className="mt-1 text-sm font-semibold" />
                   <div className="mt-3 flex items-center gap-1.5">
                     {product.colors.map((color) => (
                       <span
@@ -625,6 +631,50 @@ function ProductsAdmin({
                     className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
                   />
                 </label>
+                <label className="block text-[13px] font-semibold">
+                  Etiqueta
+                  <select
+                    value={editing.badge || ''}
+                    onChange={(e) =>
+                      setEditing({ ...editing, badge: e.target.value as ProductBadge })
+                    }
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
+                  >
+                    {BADGE_OPTIONS.map((option) => (
+                      <option key={option.value || 'none'} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-[13px] font-semibold">
+                  Descuento %
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={editing.discountPercent || 0}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        discountPercent: Math.min(100, Math.max(0, Number(e.target.value) || 0)),
+                      })
+                    }
+                    className="mt-2 w-full border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
+                  />
+                </label>
+                {productPricing(editing).hasDiscount ? (
+                  <div className="border border-line bg-white px-3 py-3 text-sm font-medium md:col-span-2">
+                    <span className="text-muted">Precio final: </span>
+                    <span className="font-semibold">{productPricing(editing).finalLabel}</span>
+                    <span className="ml-2 text-muted line-through">
+                      {productPricing(editing).originalLabel}
+                    </span>
+                    <span className="ml-2 text-gold font-semibold">
+                      {productPricing(editing).percent}% OFF
+                    </span>
+                  </div>
+                ) : null}
                 <label className="block text-[13px] font-semibold md:col-span-2">
                   Descripción
                   <textarea

@@ -56,6 +56,12 @@ function isValidProduct(product: CatalogProduct | null | undefined): product is 
   if (typeof product.price !== 'string') return false
   if (typeof product.description !== 'string') return false
   if (!Array.isArray(product.colors) || product.colors.length === 0) return false
+  const badges = ['', 'destacado', 'por-agotar', 'promocion', 'descuento']
+  if (product.badge != null && !badges.includes(product.badge)) return false
+  if (product.discountPercent != null) {
+    const n = Number(product.discountPercent)
+    if (!Number.isFinite(n) || n < 0 || n > 100) return false
+  }
   return product.colors.every(
     (color) =>
       Boolean(color) &&

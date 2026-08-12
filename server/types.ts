@@ -1,3 +1,5 @@
+export type ProductBadge = 'destacado' | 'por-agotar' | 'promocion' | 'descuento' | ''
+
 export type CatalogColor = {
   name: string
   hex: string
@@ -10,6 +12,8 @@ export type CatalogProduct = {
   price: string
   description: string
   categoryId?: string
+  badge?: ProductBadge
+  discountPercent?: number
   colors: CatalogColor[]
 }
 

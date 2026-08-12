@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { CatalogProduct } from '../types/catalog'
+import { parsePrice, productPricing } from '../lib/pricing'
 
 export type CartItem = {
   id: string
@@ -36,13 +37,7 @@ type CartContextValue = {
 const STORAGE_KEY = 'lumi-home-cart'
 const CartContext = createContext<CartContextValue | null>(null)
 
-export function parsePrice(price: string): number {
-  return Number(price.replace(/[^\d]/g, '')) || 0
-}
-
-export function formatPrice(value: number): string {
-  return `$${value.toLocaleString('es-AR')}`
-}
+export { parsePrice, formatPrice } from '../lib/pricing'
 
 function loadCart(): CartItem[] {
   try {
@@ -78,6 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const id = `${product.id}::${color}`
     const colorImage =
       product.colors.find((c) => c.name === color)?.image || product.colors[0]?.image || ''
+    const pricing = productPricing(product)
     setItems((prev) => {
       const existing = prev.find((item) => item.id === id)
       if (existing) {
@@ -90,8 +86,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         {
           id,
           name: product.name,
-          price: parsePrice(product.price),
-          priceLabel: product.price,
+          price: pricing.hasDiscount ? pricing.final : parsePrice(product.price),
+          priceLabel: pricing.hasDiscount ? pricing.finalLabel : product.price,
           image: colorImage,
           color,
           quantity: 1,

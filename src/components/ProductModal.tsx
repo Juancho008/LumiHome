@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import type { CatalogProduct } from '../types/catalog'
+import { ProductBadges, ProductPrice } from './ProductBadges'
 
 type ProductModalProps = {
   product: CatalogProduct | null
@@ -67,7 +68,8 @@ export function ProductModal({
           <X size={20} strokeWidth={1.4} />
         </button>
 
-        <div className="bg-[#efece6]">
+        <div className="relative bg-[#efece6]">
+          <ProductBadges product={product} />
           {activeColor?.image ? (
             <img
               key={activeColor.name}
@@ -92,7 +94,7 @@ export function ProductModal({
           >
             {product.name}
           </h2>
-          <p className="mt-3 text-sm tracking-[0.04em] text-muted">{product.price}</p>
+          <ProductPrice product={product} className="mt-3 text-sm" />
           <p className="mt-6 text-[13px] leading-relaxed text-ink/75">{product.description}</p>
 
           <div className="mt-auto pt-10">
