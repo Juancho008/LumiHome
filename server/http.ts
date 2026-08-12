@@ -1,5 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
+export const nodeConfig = {
+  runtime: 'nodejs' as const,
+  maxDuration: 30,
+}
+
 export function methodNotAllowed(res: VercelResponse, allow: string[]) {
   res.setHeader('Allow', allow.join(', '))
   return res.status(405).json({ error: 'Método no permitido' })
@@ -18,7 +23,7 @@ export function handleError(res: VercelResponse, err: unknown) {
   return res.status(statusCode).json({ error: message })
 }
 
-export async function readJsonBody<T>(req: VercelRequest): Promise<T> {
+export function readJsonBody<T>(req: VercelRequest): T {
   if (req.body && typeof req.body === 'object') {
     return req.body as T
   }
@@ -26,4 +31,16 @@ export async function readJsonBody<T>(req: VercelRequest): Promise<T> {
     return JSON.parse(req.body) as T
   }
   return {} as T
+}
+
+export function wrap(
+  handler: (req: VercelRequest, res: VercelResponse) => Promise<VercelResponse | void>,
+) {
+  return async (req: VercelRequest, res: VercelResponse) => {
+    try {
+      return await handler(req, res)
+    } catch (err) {
+      return handleError(res, err)
+    }
+  }
 }
