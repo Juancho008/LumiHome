@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
 import { formatPrice, useCart } from '../context/CartContext'
+import { whatsAppOrderUrl } from '../lib/whatsapp'
 
 export function CartDrawer() {
   const {
@@ -12,6 +13,11 @@ export function CartDrawer() {
     updateQuantity,
     clearCart,
   } = useCart()
+
+  const handleCheckout = () => {
+    if (items.length === 0) return
+    window.open(whatsAppOrderUrl(items, subtotal), '_blank', 'noopener,noreferrer')
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -149,6 +155,7 @@ export function CartDrawer() {
             </div>
             <button
               type="button"
+              onClick={handleCheckout}
               className="mt-5 w-full bg-ink px-6 py-3.5 text-[11px] font-medium uppercase tracking-[0.2em] text-cream transition-colors hover:bg-gold hover:text-ink"
             >
               Finalizar compra

@@ -6,7 +6,8 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { ProductGrid } from './components/ProductGrid'
-import { ContactDetails } from './components/ContactDetails'
+import { ContactSection } from './components/ContactSection'
+import { WhatsAppButton } from './components/WhatsAppButton'
 import { CartProvider } from './context/CartContext'
 import { CatalogProvider } from './context/CatalogContext'
 import { AdminPage } from './pages/AdminPage'
@@ -20,16 +21,11 @@ function Storefront() {
         <BenefitsBar />
         <ProductGrid />
         <CategoryBanners />
-        <section id="contacto" className="scroll-mt-28 bg-ink px-6 py-14 text-center text-cream md:py-16">
-          <p className="font-serif text-2xl uppercase tracking-[0.12em] md:text-3xl">Contacto</p>
-          <p className="mx-auto mt-3 max-w-lg text-[12px] uppercase tracking-[0.16em] text-cream/70">
-            Escribinos para consultas sobre productos y disponibilidad.
-          </p>
-          <ContactDetails variant="section" />
-        </section>
+        <ContactSection />
       </main>
       <Footer />
       <CartDrawer />
+      <WhatsAppButton />
     </div>
   )
 }

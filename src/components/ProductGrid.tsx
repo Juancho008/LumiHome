@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import { useCatalog } from '../context/CatalogContext'
+import { useCart } from '../context/CartContext'
 import type { CatalogProduct } from '../types/catalog'
 import { ProductBadges, ProductPrice } from './ProductBadges'
 import { ProductModal } from './ProductModal'
 
 export function ProductGrid() {
   const { catalog, loading } = useCatalog()
+  const { addItem } = useCart()
   const [selected, setSelected] = useState<CatalogProduct | null>(null)
   const [selectedColor, setSelectedColor] = useState('')
 
   const openProduct = (product: CatalogProduct) => {
     setSelected(product)
     setSelectedColor(product.colors[0]?.name ?? '')
+  }
+
+  const addProduct = (product: CatalogProduct) => {
+    const color = product.colors[0]?.name
+    if (!color) return
+    addItem(product, color)
   }
 
   return (
@@ -57,10 +65,23 @@ export function ProductGrid() {
                       {product.name}
                     </h3>
                     <ProductPrice product={product} className="mt-1" />
-                    <span className="mt-3 inline-block text-[10px] font-medium uppercase tracking-[0.18em] text-ink underline decoration-transparent underline-offset-4 transition-all duration-300 group-hover:decoration-ink">
-                      Ver producto
-                    </span>
                   </button>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <button
+                      type="button"
+                      onClick={() => openProduct(product)}
+                      className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink underline decoration-transparent underline-offset-4 transition-all duration-300 hover:decoration-ink"
+                    >
+                      Ver producto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addProduct(product)}
+                      className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink/70 transition-colors hover:text-gold"
+                    >
+                      Agregar a carrito
+                    </button>
+                  </div>
                 </article>
               )
             })}

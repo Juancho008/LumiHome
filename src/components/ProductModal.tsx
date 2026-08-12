@@ -142,7 +142,7 @@ export function ProductModal({
               onClick={handleAdd}
               className="mt-8 w-full bg-ink px-6 py-3.5 text-[11px] font-medium uppercase tracking-[0.2em] text-cream transition-colors duration-300 hover:bg-gold hover:text-ink"
             >
-              Agregar al carrito
+              Agregar a carrito
             </button>
           </div>
         </div>
