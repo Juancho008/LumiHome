@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Product } from '../components/ProductModal'
+import type { CatalogProduct } from '../types/catalog'
 
 export type CartItem = {
   id: string
@@ -27,7 +27,7 @@ type CartContextValue = {
   openCart: () => void
   closeCart: () => void
   toggleCart: () => void
-  addItem: (product: Product, color: string) => void
+  addItem: (product: CatalogProduct, color: string) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
@@ -74,8 +74,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = useCallback(() => setIsOpen(false), [])
   const toggleCart = useCallback(() => setIsOpen((v) => !v), [])
 
-  const addItem = useCallback((product: Product, color: string) => {
-    const id = `${product.name}::${color}`
+  const addItem = useCallback((product: CatalogProduct, color: string) => {
+    const id = `${product.id}::${color}`
+    const colorImage =
+      product.colors.find((c) => c.name === color)?.image || product.colors[0]?.image || ''
     setItems((prev) => {
       const existing = prev.find((item) => item.id === id)
       if (existing) {
@@ -90,7 +92,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           name: product.name,
           price: parsePrice(product.price),
           priceLabel: product.price,
-          image: product.image,
+          image: colorImage,
           color,
           quantity: 1,
         },

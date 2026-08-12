@@ -1,48 +1,39 @@
 import { useEffect, useState } from 'react'
-import { productImages } from '../data/products'
-
-const slides = [
-  {
-    id: 1,
-    title: 'Decoraciones para tu hogar',
-    subtitle: 'Decora tu living a gusto, con piezas que inspiran.',
-    image: productImages.mesaAuxiliar,
-    cta: 'Ver más',
-  },
-  {
-    id: 2,
-    title: 'Ambientes con estilo',
-    subtitle: 'Iluminación y detalles para transformar cada rincón.',
-    image: productImages.lamparaMesa,
-    cta: 'Explorar',
-  },
-  {
-    id: 3,
-    title: 'Tu espacio, tu esencia',
-    subtitle: 'Accesorios elegantes para acompañar tu día a día.',
-    image: productImages.tazasVidrio,
-    cta: 'Descubrir',
-  },
-]
+import { useCatalog } from '../context/CatalogContext'
 
 export function Hero() {
+  const { catalog } = useCatalog()
+  const slides = catalog.banners
   const [active, setActive] = useState(0)
   const [animKey, setAnimKey] = useState(0)
 
   useEffect(() => {
+    setActive(0)
+  }, [slides.length])
+
+  useEffect(() => {
+    if (slides.length <= 1) return
     const timer = window.setInterval(() => {
       setActive((prev) => (prev + 1) % slides.length)
       setAnimKey((k) => k + 1)
     }, 6500)
     return () => window.clearInterval(timer)
-  }, [])
+  }, [slides.length])
+
+  if (slides.length === 0) {
+    return (
+      <section id="inicio" className="flex h-[60vh] items-center justify-center bg-[#efece6]">
+        <p className="text-[12px] uppercase tracking-[0.16em] text-muted">Sin banners</p>
+      </section>
+    )
+  }
 
   const goTo = (index: number) => {
     setActive(index)
     setAnimKey((k) => k + 1)
   }
 
-  const slide = slides[active]
+  const slide = slides[active] ?? slides[0]
 
   return (
     <section id="inicio" className="relative h-[100svh] min-h-[620px] overflow-hidden">
@@ -54,13 +45,17 @@ export function Hero() {
           }`}
           aria-hidden={index !== active}
         >
-          <img
-            src={item.image}
-            alt=""
-            className={`h-full w-full object-cover object-center ${
-              index === active ? 'animate-ken-burns' : ''
-            }`}
-          />
+          {item.image ? (
+            <img
+              src={item.image}
+              alt=""
+              className={`h-full w-full object-cover object-center ${
+                index === active ? 'animate-ken-burns' : ''
+              }`}
+            />
+          ) : (
+            <div className="h-full w-full bg-[#d8d4cd]" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/20 to-black/35" />
         </div>
       ))}

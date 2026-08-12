@@ -1,22 +1,10 @@
 import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-
-export type ProductColor = {
-  name: string
-  hex: string
-}
-
-export type Product = {
-  name: string
-  price: string
-  image: string
-  description: string
-  colors: ProductColor[]
-}
+import type { CatalogProduct } from '../types/catalog'
 
 type ProductModalProps = {
-  product: Product | null
+  product: CatalogProduct | null
   selectedColor: string
   onSelectColor: (name: string) => void
   onClose: () => void
@@ -48,8 +36,12 @@ export function ProductModal({
 
   if (!product) return null
 
+  const activeColor =
+    product.colors.find((c) => c.name === selectedColor) || product.colors[0]
+
   const handleAdd = () => {
-    addItem(product, selectedColor || product.colors[0]?.name || 'Único')
+    if (!activeColor) return
+    addItem(product, activeColor.name)
     onClose()
   }
 
@@ -76,11 +68,18 @@ export function ProductModal({
         </button>
 
         <div className="bg-[#efece6]">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full max-h-[42vh] w-full object-cover md:max-h-none md:min-h-[520px]"
-          />
+          {activeColor?.image ? (
+            <img
+              key={activeColor.name}
+              src={activeColor.image}
+              alt={`${product.name} — ${activeColor.name}`}
+              className="h-full max-h-[42vh] w-full object-cover animate-fade-in md:max-h-none md:min-h-[520px]"
+            />
+          ) : (
+            <div className="flex h-full min-h-[280px] items-center justify-center text-[12px] text-muted md:min-h-[520px]">
+              Sin imagen
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col overflow-y-auto px-6 py-8 md:px-10 md:py-12">

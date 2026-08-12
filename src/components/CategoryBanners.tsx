@@ -1,33 +1,11 @@
-import { productImages } from '../data/products'
-
-const categories = [
-  {
-    id: 'living',
-    title: 'Living',
-    image: productImages.mesaAuxiliar,
-    cta: 'Ver más',
-  },
-  {
-    id: 'iluminacion',
-    title: 'Iluminación',
-    image: productImages.lamparaMesa,
-    cta: 'Ver más',
-  },
-  {
-    id: 'mesas',
-    title: 'Mesas auxiliares',
-    image: productImages.lamparaMinimal,
-    cta: 'Ver más',
-  },
-  {
-    id: 'accesorios',
-    title: 'Accesorios',
-    image: productImages.tazasVidrio,
-    cta: 'Ver más',
-  },
-]
+import { useCatalog } from '../context/CatalogContext'
 
 export function CategoryBanners() {
+  const { catalog } = useCatalog()
+  const categories = catalog.categories
+
+  if (categories.length === 0) return null
+
   return (
     <section className="bg-cream pb-6 md:pb-10">
       <div className="mx-auto grid max-w-[1400px] gap-3 px-3 md:grid-cols-2 md:gap-4 md:px-4">
@@ -38,12 +16,16 @@ export function CategoryBanners() {
             href="#tienda"
             className="group relative block min-h-[280px] overflow-hidden md:min-h-[360px]"
           >
-            <img
-              src={category.image}
-              alt={category.title}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
+            {category.image ? (
+              <img
+                src={category.image}
+                alt={category.title}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[#d8d4cd]" />
+            )}
             <div className="absolute inset-0 bg-black/30 transition-colors duration-300 group-hover:bg-black/40" />
             <div className="relative z-10 flex h-full min-h-[280px] flex-col items-center justify-center px-6 text-center text-white md:min-h-[360px]">
               <h2 className="font-serif text-3xl font-medium uppercase tracking-[0.1em] md:text-4xl">
