@@ -787,7 +787,8 @@ function ProductsAdmin({
                     className="mt-2 w-full whitespace-pre-wrap border border-line bg-white px-3 py-3 text-sm font-medium outline-none focus:border-ink"
                   />
                   <span className="mt-1.5 block text-[12px] font-medium text-muted">
-                    Enter crea una línea nueva. Si cada renglón empieza con ➡️, se muestra como lista.
+                    Podés usar Enter o escribir todo en una línea con ➡️ entre cada punto. Se verá
+                    como lista en la tienda.
                   </span>
                 </label>
                 <label className="block text-[13px] font-semibold">

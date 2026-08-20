@@ -1,10 +1,29 @@
-const BULLET = /^(?:➡️|➔|→|‣|▪|•|-|–|\*)\s*/
+const BULLET_MARKER = /(?:➡️|➔|→|‣|▪|•)/
+const BULLET_SPLIT = /\s*(?:➡️|➔|→|‣|▪|•)\s*/
 
-function splitLines(text: string): string[] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
+function parseDescription(text: string): { intro: string; items: string[] } {
+  const trimmed = text.trim()
+  if (!trimmed) return { intro: '', items: [] }
+
+  if (!BULLET_MARKER.test(trimmed)) {
+    return { intro: trimmed, items: [] }
+  }
+
+  const parts = trimmed
+    .split(BULLET_SPLIT)
+    .map((part) => part.trim())
     .filter(Boolean)
+
+  const startsWithBullet = BULLET_MARKER.test(trimmed.slice(0, 4))
+
+  if (startsWithBullet) {
+    return { intro: '', items: parts }
+  }
+
+  return {
+    intro: parts[0] ?? '',
+    items: parts.slice(1),
+  }
 }
 
 export function ProductDescription({
@@ -14,29 +33,26 @@ export function ProductDescription({
   text: string
   className?: string
 }) {
-  const lines = splitLines(text)
-  if (lines.length === 0) return null
+  const { intro, items } = parseDescription(text)
+  if (!intro && items.length === 0) return null
 
-  const bulletCount = lines.filter((line) => BULLET.test(line)).length
-  const asList = lines.length > 1 && bulletCount >= Math.ceil(lines.length / 2)
-
-  if (asList) {
-    return (
-      <ul className={`space-y-2.5 ${className}`}>
-        {lines.map((line, index) => {
-          const content = line.replace(BULLET, '').trim() || line
-          return (
-            <li key={`${index}-${content.slice(0, 24)}`} className="flex gap-2.5">
-              <span aria-hidden="true" className="mt-[0.2em] text-[11px] leading-none text-gold">
-                ➜
-              </span>
-              <span className="min-w-0">{content}</span>
-            </li>
-          )
-        })}
-      </ul>
-    )
+  if (items.length === 0) {
+    return <p className={`whitespace-pre-line ${className}`}>{intro}</p>
   }
 
-  return <p className={`whitespace-pre-line ${className}`}>{text.trim()}</p>
+  return (
+    <div className={className}>
+      {intro ? <p className="mb-3 whitespace-pre-line">{intro}</p> : null}
+      <ul className="space-y-2.5">
+        {items.map((item, index) => (
+          <li key={`${index}-${item.slice(0, 24)}`} className="flex gap-2.5">
+            <span aria-hidden="true" className="mt-[0.2em] shrink-0 text-[11px] leading-none text-gold">
+              ➜
+            </span>
+            <span className="min-w-0">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
