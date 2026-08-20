@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Plus, Trash2, X, BarChart3, Users, Eye, MousePointerClick } from 'lucide-react'
+import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import {
   clearAdminToken,
   createProduct,
@@ -26,6 +26,7 @@ import type {
 } from '../types/catalog'
 import type { SiteStats } from '../types/stats'
 import { Logo } from '../components/Logo'
+import { AdminStatsPanel } from '../components/AdminStatsPanel'
 import { ProductBadges, ProductPrice } from '../components/ProductBadges'
 
 type Tab = 'banners' | 'categories' | 'products' | 'contact' | 'stats'
@@ -468,7 +469,7 @@ export function AdminPage() {
               <div>
                 <h2 className="font-serif text-2xl tracking-[0.06em]">Estadísticas de la tienda</h2>
                 <p className="mt-1 text-[13px] text-muted">
-                  Visitas, vistas de página y clics en productos desde que se activó el seguimiento.
+                  Visitas, clics, colores elegidos y productos agregados al carrito.
                 </p>
               </div>
               <button
@@ -493,90 +494,7 @@ export function AdminPage() {
             {statsLoading && !stats ? (
               <p className="text-sm text-muted">Cargando estadísticas…</p>
             ) : stats ? (
-              <>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <article className="border border-line bg-white/40 p-6">
-                    <div className="flex items-center gap-3 text-muted">
-                      <Users className="h-5 w-5" strokeWidth={1.5} />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
-                        Visitantes
-                      </p>
-                    </div>
-                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
-                      {stats.visits.toLocaleString('es-AR')}
-                    </p>
-                    <p className="mt-2 text-[12px] text-muted">Personas que entraron a la página</p>
-                  </article>
-
-                  <article className="border border-line bg-white/40 p-6">
-                    <div className="flex items-center gap-3 text-muted">
-                      <Eye className="h-5 w-5" strokeWidth={1.5} />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
-                        Vistas
-                      </p>
-                    </div>
-                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
-                      {stats.pageViews.toLocaleString('es-AR')}
-                    </p>
-                    <p className="mt-2 text-[12px] text-muted">Veces que se cargó la tienda</p>
-                  </article>
-
-                  <article className="border border-line bg-white/40 p-6">
-                    <div className="flex items-center gap-3 text-muted">
-                      <MousePointerClick className="h-5 w-5" strokeWidth={1.5} />
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
-                        Clics en productos
-                      </p>
-                    </div>
-                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
-                      {stats.productClicks.toLocaleString('es-AR')}
-                    </p>
-                    <p className="mt-2 text-[12px] text-muted">
-                      Veces que alguien abrió un producto
-                    </p>
-                  </article>
-                </div>
-
-                {Object.keys(stats.byProduct).length > 0 ? (
-                  <div>
-                    <div className="mb-4 flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-muted" strokeWidth={1.5} />
-                      <h3 className="font-serif text-xl tracking-[0.06em]">Clics por producto</h3>
-                    </div>
-                    <div className="overflow-x-auto border border-line bg-white/30">
-                      <table className="w-full min-w-[320px] text-left text-[13px]">
-                        <thead>
-                          <tr className="border-b border-line bg-[#f3f1ec] text-[11px] uppercase tracking-[0.12em] text-muted">
-                            <th className="px-4 py-3 font-semibold">Producto</th>
-                            <th className="px-4 py-3 font-semibold text-right">Clics</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(stats.byProduct)
-                            .sort(([, a], [, b]) => b - a)
-                            .map(([productId, clicks]) => {
-                              const product = catalog.products.find((p) => p.id === productId)
-                              return (
-                                <tr key={productId} className="border-b border-line/60 last:border-0">
-                                  <td className="px-4 py-3 text-ink">
-                                    {product?.name ?? productId}
-                                  </td>
-                                  <td className="px-4 py-3 text-right font-medium tabular-nums text-ink">
-                                    {clicks.toLocaleString('es-AR')}
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-[13px] text-muted">
-                    Todavía no hay clics registrados en productos.
-                  </p>
-                )}
-              </>
+              <AdminStatsPanel stats={stats} products={catalog.products} />
             ) : null}
           </section>
         ) : null}

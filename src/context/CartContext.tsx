@@ -9,6 +9,7 @@ import {
 } from 'react'
 import type { CatalogProduct } from '../types/catalog'
 import { parsePrice, productPricing } from '../lib/pricing'
+import { trackAddToCart } from '../lib/track'
 
 export type CartItem = {
   id: string
@@ -70,6 +71,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const toggleCart = useCallback(() => setIsOpen((v) => !v), [])
 
   const addItem = useCallback((product: CatalogProduct, color: string) => {
+    trackAddToCart(product.id, color)
     const id = `${product.id}::${color}`
     const colorImage =
       product.colors.find((c) => c.name === color)?.image || product.colors[0]?.image || ''

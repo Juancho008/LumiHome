@@ -12,6 +12,7 @@ import { ContactSection } from './components/ContactSection'
 import { WhatsAppButton } from './components/WhatsAppButton'
 import { CartProvider } from './context/CartContext'
 import { CatalogProvider } from './context/CatalogContext'
+import { SplashGate } from './components/SplashGate'
 import { AdminPage } from './pages/AdminPage'
 
 function Storefront() {
@@ -41,6 +42,7 @@ function App() {
     <BrowserRouter>
       <CatalogProvider>
         <CartProvider>
+          <SplashGate />
           <Routes>
             <Route path="/" element={<Storefront />} />
             <Route path="/admin" element={<AdminPage />} />

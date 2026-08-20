@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { trackColorSelect } from '../lib/track'
 import type { CatalogProduct } from '../types/catalog'
 import { ProductBadges, ProductPrice } from './ProductBadges'
 
@@ -39,6 +40,11 @@ export function ProductModal({
 
   const activeColor =
     product.colors.find((c) => c.name === selectedColor) || product.colors[0]
+
+  const handleColorSelect = (colorName: string) => {
+    trackColorSelect(product.id, colorName)
+    onSelectColor(colorName)
+  }
 
   const handleAdd = () => {
     if (!activeColor) return
@@ -111,7 +117,7 @@ export function ProductModal({
                     <button
                       key={color.name}
                       type="button"
-                      onClick={() => onSelectColor(color.name)}
+                      onClick={() => handleColorSelect(color.name)}
                       className={`group flex flex-col items-center gap-2 ${selected ? '' : 'opacity-80'}`}
                       aria-label={`Color ${color.name}`}
                       aria-pressed={selected}
