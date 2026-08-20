@@ -8,6 +8,7 @@ import { categoryTitle, filterProducts } from '../lib/search'
 import type { CatalogProduct } from '../types/catalog'
 import { CategoryPills } from './CategoryPills'
 import { ProductBadges, ProductPrice } from './ProductBadges'
+import { ProductDescription } from './ProductDescription'
 import { ProductModal } from './ProductModal'
 
 export function ProductGrid() {
@@ -121,9 +122,10 @@ export function ProductGrid() {
                         </h3>
                       </button>
                       <ProductPrice product={product} className="mt-2" />
-                      <p className="mt-2 hidden max-w-xl text-[13px] leading-relaxed text-ink/70 md:block">
-                        {product.description}
-                      </p>
+                      <ProductDescription
+                        text={product.description}
+                        className="mt-2 max-w-xl text-[13px] leading-relaxed text-ink/70 max-md:hidden"
+                      />
                       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                         <button
                           type="button"
