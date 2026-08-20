@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { trackPageVisit } from './lib/track'
 import { BenefitsBar } from './components/BenefitsBar'
 import { CartDrawer } from './components/CartDrawer'
 import { CategoryBanners } from './components/CategoryBanners'
@@ -13,6 +15,10 @@ import { CatalogProvider } from './context/CatalogContext'
 import { AdminPage } from './pages/AdminPage'
 
 function Storefront() {
+  useEffect(() => {
+    trackPageVisit()
+  }, [])
+
   return (
     <div className="min-h-svh bg-cream">
       <Header />

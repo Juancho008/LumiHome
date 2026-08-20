@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Pencil, Plus, Trash2, X, BarChart3, Users, Eye, MousePointerClick } from 'lucide-react'
 import {
   clearAdminToken,
   createProduct,
   deleteProduct,
+  fetchStats,
   getAdminToken,
   loginAdmin,
   saveBanners,
@@ -23,10 +24,11 @@ import type {
   CatalogProduct,
   ProductBadge,
 } from '../types/catalog'
+import type { SiteStats } from '../types/stats'
 import { Logo } from '../components/Logo'
 import { ProductBadges, ProductPrice } from '../components/ProductBadges'
 
-type Tab = 'banners' | 'categories' | 'products' | 'contact'
+type Tab = 'banners' | 'categories' | 'products' | 'contact' | 'stats'
 
 function newId(prefix: string) {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
@@ -97,6 +99,8 @@ export function AdminPage() {
   const [categories, setCategories] = useState<CatalogCategory[]>([])
   const [contact, setContact] = useState<CatalogContact>({ email: '', phone: '' })
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null)
+  const [stats, setStats] = useState<SiteStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
 
   useEffect(() => {
     setBanners(catalog.banners)
@@ -106,6 +110,16 @@ export function AdminPage() {
       phone: catalog.contact?.phone ?? '',
     })
   }, [catalog])
+
+  useEffect(() => {
+    if (!authed || tab !== 'stats') return
+    setStatsLoading(true)
+    setError(null)
+    void fetchStats()
+      .then(setStats)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Error al cargar estadísticas'))
+      .finally(() => setStatsLoading(false))
+  }, [authed, tab])
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -219,6 +233,7 @@ export function AdminPage() {
               ['categories', 'Categorías'],
               ['products', 'Productos'],
               ['contact', 'Contacto'],
+              ['stats', 'Estadísticas'],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -444,6 +459,125 @@ export function AdminPage() {
             >
               {saving ? 'Guardando…' : 'Guardar contacto'}
             </button>
+          </section>
+        ) : null}
+
+        {tab === 'stats' ? (
+          <section className="mt-8 space-y-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="font-serif text-2xl tracking-[0.06em]">Estadísticas de la tienda</h2>
+                <p className="mt-1 text-[13px] text-muted">
+                  Visitas, vistas de página y clics en productos desde que se activó el seguimiento.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={statsLoading}
+                onClick={() => {
+                  setStatsLoading(true)
+                  setError(null)
+                  void fetchStats()
+                    .then(setStats)
+                    .catch((err) =>
+                      setError(err instanceof Error ? err.message : 'Error al cargar estadísticas'),
+                    )
+                    .finally(() => setStatsLoading(false))
+                }}
+                className="bg-ink px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-cream hover:bg-gold hover:text-ink disabled:opacity-50"
+              >
+                {statsLoading ? 'Actualizando…' : 'Actualizar'}
+              </button>
+            </div>
+
+            {statsLoading && !stats ? (
+              <p className="text-sm text-muted">Cargando estadísticas…</p>
+            ) : stats ? (
+              <>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <article className="border border-line bg-white/40 p-6">
+                    <div className="flex items-center gap-3 text-muted">
+                      <Users className="h-5 w-5" strokeWidth={1.5} />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Visitantes
+                      </p>
+                    </div>
+                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
+                      {stats.visits.toLocaleString('es-AR')}
+                    </p>
+                    <p className="mt-2 text-[12px] text-muted">Personas que entraron a la página</p>
+                  </article>
+
+                  <article className="border border-line bg-white/40 p-6">
+                    <div className="flex items-center gap-3 text-muted">
+                      <Eye className="h-5 w-5" strokeWidth={1.5} />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Vistas
+                      </p>
+                    </div>
+                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
+                      {stats.pageViews.toLocaleString('es-AR')}
+                    </p>
+                    <p className="mt-2 text-[12px] text-muted">Veces que se cargó la tienda</p>
+                  </article>
+
+                  <article className="border border-line bg-white/40 p-6">
+                    <div className="flex items-center gap-3 text-muted">
+                      <MousePointerClick className="h-5 w-5" strokeWidth={1.5} />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Clics en productos
+                      </p>
+                    </div>
+                    <p className="mt-4 font-serif text-4xl tracking-[0.04em] text-ink">
+                      {stats.productClicks.toLocaleString('es-AR')}
+                    </p>
+                    <p className="mt-2 text-[12px] text-muted">
+                      Veces que alguien abrió un producto
+                    </p>
+                  </article>
+                </div>
+
+                {Object.keys(stats.byProduct).length > 0 ? (
+                  <div>
+                    <div className="mb-4 flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-muted" strokeWidth={1.5} />
+                      <h3 className="font-serif text-xl tracking-[0.06em]">Clics por producto</h3>
+                    </div>
+                    <div className="overflow-x-auto border border-line bg-white/30">
+                      <table className="w-full min-w-[320px] text-left text-[13px]">
+                        <thead>
+                          <tr className="border-b border-line bg-[#f3f1ec] text-[11px] uppercase tracking-[0.12em] text-muted">
+                            <th className="px-4 py-3 font-semibold">Producto</th>
+                            <th className="px-4 py-3 font-semibold text-right">Clics</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(stats.byProduct)
+                            .sort(([, a], [, b]) => b - a)
+                            .map(([productId, clicks]) => {
+                              const product = catalog.products.find((p) => p.id === productId)
+                              return (
+                                <tr key={productId} className="border-b border-line/60 last:border-0">
+                                  <td className="px-4 py-3 text-ink">
+                                    {product?.name ?? productId}
+                                  </td>
+                                  <td className="px-4 py-3 text-right font-medium tabular-nums text-ink">
+                                    {clicks.toLocaleString('es-AR')}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[13px] text-muted">
+                    Todavía no hay clics registrados en productos.
+                  </p>
+                )}
+              </>
+            ) : null}
           </section>
         ) : null}
 

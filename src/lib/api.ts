@@ -5,6 +5,7 @@ import type {
   CatalogContact,
   CatalogProduct,
 } from '../types/catalog'
+import type { SiteStats } from '../types/stats'
 import { normalizeCatalog } from '../types/catalog'
 
 const TOKEN_KEY = 'lumi-admin-token'
@@ -113,4 +114,10 @@ export async function deleteProduct(id: string): Promise<Catalog> {
   })
   if (!res.ok) throw new Error(await parseError(res))
   return res.json() as Promise<Catalog>
+}
+
+export async function fetchStats(): Promise<SiteStats> {
+  const res = await fetch('/api/admin/stats', { headers: authHeaders() })
+  if (!res.ok) throw new Error(await parseError(res))
+  return res.json() as Promise<SiteStats>
 }

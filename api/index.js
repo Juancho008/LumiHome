@@ -4,6 +4,7 @@ import {
   readCatalog,
   writeCatalog,
 } from '../lib/store.js'
+import { readStats, recordEvent } from '../lib/stats.js'
 
 function getRoute(req) {
   const fromQuery = req.query?.route
@@ -63,6 +64,19 @@ export default async function handler(req, res) {
 
     if (route === 'catalog' && method === 'GET') {
       return send(res, 200, await readCatalog())
+    }
+
+    if (route === 'events' && method === 'POST') {
+      const event = readBody(req)
+      await recordEvent(event)
+      return send(res, 200, { ok: true })
+    }
+
+    if (route === 'admin/stats' && method === 'GET') {
+      if (!isAuthorized(req.headers.authorization)) {
+        return send(res, 401, { error: 'No autorizado' })
+      }
+      return send(res, 200, await readStats())
     }
 
     if (route === 'admin/login' && method === 'POST') {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCatalog } from '../context/CatalogContext'
 import { useCart } from '../context/CartContext'
+import { trackProductClick } from '../lib/track'
 import type { CatalogProduct } from '../types/catalog'
 import { ProductBadges, ProductPrice } from './ProductBadges'
 import { ProductModal } from './ProductModal'
@@ -12,6 +13,7 @@ export function ProductGrid() {
   const [selectedColor, setSelectedColor] = useState('')
 
   const openProduct = (product: CatalogProduct) => {
+    trackProductClick(product.id)
     setSelected(product)
     setSelectedColor(product.colors[0]?.name ?? '')
   }

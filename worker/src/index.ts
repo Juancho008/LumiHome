@@ -8,6 +8,14 @@ import type {
   CatalogProduct,
 } from '../../src/types/catalog'
 import { CATALOG_KEY, emptyCatalog, normalizeCatalog } from '../../src/types/catalog'
+import {
+  STATS_KEY,
+  applyEvent,
+  emptyStats,
+  isValidEvent,
+  normalizeStats,
+  type SiteStats,
+} from '../../server/stats'
 import { createSeedCatalog } from './seed'
 
 type Bindings = {
@@ -32,6 +40,20 @@ async function readCatalog(kv: KVNamespace): Promise<Catalog> {
   } catch {
     return emptyCatalog()
   }
+}
+
+async function readStats(kv: KVNamespace): Promise<SiteStats> {
+  const raw = await kv.get(STATS_KEY, 'text')
+  if (!raw) return emptyStats()
+  try {
+    return normalizeStats(JSON.parse(raw))
+  } catch {
+    return emptyStats()
+  }
+}
+
+async function writeStats(kv: KVNamespace, stats: SiteStats): Promise<void> {
+  await kv.put(STATS_KEY, JSON.stringify(stats))
 }
 
 async function writeCatalog(kv: KVNamespace, catalog: Catalog): Promise<Response | null> {
@@ -87,6 +109,23 @@ function requireAdmin(c: { req: { header: (name: string) => string | undefined }
 app.get('/api/catalog', async (c) => {
   const catalog = await readCatalog(c.env.LUMI_STORE)
   return c.json(catalog)
+})
+
+app.post('/api/events', async (c) => {
+  const body = await c.req.json().catch(() => null)
+  if (!isValidEvent(body)) {
+    return c.json({ error: 'Evento inválido' }, 400)
+  }
+  const stats = await readStats(c.env.LUMI_STORE)
+  const next = applyEvent(stats, body)
+  await writeStats(c.env.LUMI_STORE, next)
+  return c.json({ ok: true })
+})
+
+app.get('/api/admin/stats', async (c) => {
+  if (!requireAdmin(c)) return unauthorized()
+  const stats = await readStats(c.env.LUMI_STORE)
+  return c.json(stats)
 })
 
 app.post('/api/admin/login', async (c) => {
