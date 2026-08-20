@@ -1,7 +1,9 @@
 import { useCatalog } from '../context/CatalogContext'
+import { useShop } from '../context/ShopContext'
 
 export function CategoryBanners() {
   const { catalog } = useCatalog()
+  const { applyCategory } = useShop()
   const categories = catalog.categories
 
   if (categories.length === 0) return null
@@ -10,16 +12,17 @@ export function CategoryBanners() {
     <section className="bg-cream pb-6 md:pb-10">
       <div className="mx-auto grid max-w-[1400px] gap-3 px-3 md:grid-cols-2 md:gap-4 md:px-4">
         {categories.map((category) => (
-          <a
+          <button
             key={category.id}
             id={category.id}
-            href="#tienda"
-            className="group relative block min-h-[280px] overflow-hidden md:min-h-[360px]"
+            type="button"
+            onClick={() => applyCategory(category.id)}
+            className="group relative block min-h-[280px] overflow-hidden text-left md:min-h-[360px]"
           >
             {category.image ? (
               <img
                 src={category.image}
-                alt={category.title}
+                alt=""
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
               />
@@ -35,7 +38,7 @@ export function CategoryBanners() {
                 {category.cta}
               </span>
             </div>
-          </a>
+          </button>
         ))}
       </div>
     </section>

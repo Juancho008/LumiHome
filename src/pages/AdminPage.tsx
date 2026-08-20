@@ -353,7 +353,12 @@ export function AdminPage() {
         {tab === 'categories' ? (
           <section className="mt-8 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif text-2xl tracking-[0.06em]">Categorías</h2>
+              <div>
+                <h2 className="font-serif text-2xl tracking-[0.06em]">Categorías</h2>
+                <p className="mt-1 text-[13px] text-muted">
+                  Se muestran en la tienda y en el buscador. Después asignalas a cada producto.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() =>
@@ -797,6 +802,10 @@ function ProductsAdmin({
                       </option>
                     ))}
                   </select>
+                  <span className="mt-1.5 block text-[12px] font-medium text-muted">
+                    Así aparece en el buscador y en los filtros de la tienda. Creá categorías en la
+                    pestaña Categorías.
+                  </span>
                 </label>
               </div>
 

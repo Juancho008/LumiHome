@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Menu, Search, ShoppingBag, User, X } from 'lucide-react'
+import { Menu, ShoppingBag, User, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useCatalog } from '../context/CatalogContext'
+import { useShop } from '../context/ShopContext'
 import { Logo } from './Logo'
+import { SearchBar } from './SearchBar'
 
 const navItems = [
   { label: 'Inicio', href: '#inicio' },
@@ -12,8 +15,11 @@ const navItems = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [accountHint, setAccountHint] = useState(false)
   const { itemCount, openCart } = useCart()
+  const { catalog } = useCatalog()
+  const { applyCategory } = useShop()
 
   useEffect(() => {
     if (!accountHint) return
@@ -61,13 +67,7 @@ export function Header() {
           </div>
 
           <div className="relative z-10 ml-auto flex items-center gap-1 md:gap-2">
-            <button
-              type="button"
-              className="flex h-10 w-10 items-center justify-center text-ink transition-opacity hover:opacity-60"
-              aria-label="Buscar"
-            >
-              <Search size={20} strokeWidth={1.4} />
-            </button>
+            <SearchBar open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={() => setSearchOpen(false)} />
             <div className="relative hidden sm:block">
               <button
                 type="button"
@@ -135,6 +135,29 @@ export function Header() {
               </li>
             ))}
           </ul>
+          {catalog.categories.length > 0 ? (
+            <div className="mt-10">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+                Categorías
+              </p>
+              <ul className="mt-4 flex flex-col gap-3">
+                {catalog.categories.map((category) => (
+                  <li key={category.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        applyCategory(category.id)
+                        setOpen(false)
+                      }}
+                      className="text-sm font-medium uppercase tracking-[0.16em] text-ink"
+                    >
+                      {category.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       </div>
     </>

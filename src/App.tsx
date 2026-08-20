@@ -12,6 +12,7 @@ import { ContactSection } from './components/ContactSection'
 import { WhatsAppButton } from './components/WhatsAppButton'
 import { CartProvider } from './context/CartContext'
 import { CatalogProvider } from './context/CatalogContext'
+import { ShopProvider } from './context/ShopContext'
 import { SplashGate } from './components/SplashGate'
 import { AdminPage } from './pages/AdminPage'
 
@@ -21,19 +22,21 @@ function Storefront() {
   }, [])
 
   return (
-    <div className="min-h-svh bg-cream">
-      <Header />
-      <main>
-        <Hero />
-        <BenefitsBar />
-        <ProductGrid />
-        <CategoryBanners />
-        <ContactSection />
-      </main>
-      <Footer />
-      <CartDrawer />
-      <WhatsAppButton />
-    </div>
+    <ShopProvider>
+      <div className="min-h-svh bg-cream">
+        <Header />
+        <main>
+          <Hero />
+          <BenefitsBar />
+          <CategoryBanners />
+          <ProductGrid />
+          <ContactSection />
+        </main>
+        <Footer />
+        <CartDrawer />
+        <WhatsAppButton />
+      </div>
+    </ShopProvider>
   )
 }
 
